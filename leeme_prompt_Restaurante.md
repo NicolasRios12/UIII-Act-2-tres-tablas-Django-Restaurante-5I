@@ -3,7 +3,7 @@ Perfecto — te entrego **todo** lo que pediste: procedimientos paso a paso y el
 
 ---
 
-# 1 — Estructura inicial (qué crear)
+# 0 — Estructura inicial (qué crear)
 
 Al inicio crea esta estructura (puedes crear carpetas manualmente o con comandos):
 
@@ -40,123 +40,68 @@ UIII_Restaurante_0676/
 
 ---
 
-# 2 — Procedimientos paso a paso
+# Guía Completa: Proyecto Restaurante con Django
 
-### 1) Crear carpeta del proyecto
-
-En tu explorador de archivos o terminal crea la carpeta:
-
-```
+## 1. Crear Carpeta del Proyecto
+```bash
 mkdir UIII_Restaurante_0676
+```
+
+## 2. Abrir VS Code en la Carpeta
+```bash
 cd UIII_Restaurante_0676
-```
-
-### 2) Abrir VS Code sobre la carpeta
-
-* Abre VS Code y selecciona *File → Open Folder...* y abre `UIII_Restaurante_0676`.
-* O desde terminal (si tienes code en PATH):
-
-```
 code .
 ```
 
-### 3) Abrir terminal en VS Code
+## 3. Abrir Terminal en VS Code
+- `Ctrl + ù` (Windows/Linux) o `Ctrl + Shift + ù` (Mac)
+- O menú: View → Terminal
 
-* Menú: *View → Terminal*.
-* O atajo: ``Ctrl+` `` (control + tilde).
-
-### 4) Crear entorno virtual `.venv` desde terminal de VS Code
-
-En la raíz `UIII_Restaurante_0676`:
-
-* En Windows (PowerShell):
-
-```
+## 4. Crear Entorno Virtual
+```bash
 python -m venv .venv
 ```
 
-* En macOS / Linux:
-
-```
-python3 -m venv .venv
-```
-
-### 5) Activar el entorno virtual
-
-* Windows PowerShell:
-
-```
-.venv\Scripts\Activate.ps1
-```
-
-(si da error por ejecución: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` en PowerShell con permisos de administrador)
-
-* Windows CMD:
-
-```
+## 5. Activar Entorno Virtual
+**Windows:**
+```bash
 .venv\Scripts\activate
 ```
-
-* macOS / Linux:
-
-```
+**Mac/Linux:**
+```bash
 source .venv/bin/activate
 ```
 
-Verifica: `(.venv)` aparecerá en el prompt.
+## 6. Activar Intérprete de Python
+- `Ctrl + Shift + P`
+- Buscar: "Python: Select Interpreter"
+- Seleccionar: `./.venv/Scripts/python.exe`
 
-### 6) Activar intérprete de Python en VS Code
-
-* En VS Code: `Ctrl+Shift+P` → `Python: Select Interpreter` → elige la ruta a `UIII_Restaurante_0676/.venv/.../python`.
-* También puedes abrir un archivo .py y VS Code sugerirá seleccionar el intérprete.
-
-### 7) Instalar Django
-
-Con el entorno activo:
-
-```
+## 7. Instalar Django
+```bash
 pip install django
 ```
 
-(Verifica con `django-admin --version` o `python -m django --version`.)
-
-### 8) Crear proyecto `backend_Restaurante` **sin duplicar carpeta**
-
-Para evitar crear una carpeta extra, haz **esto dentro** de `UIII_Restaurante_0676`:
-
-```
+## 8. Crear Proyecto Django
+```bash
 django-admin startproject backend_Restaurante .
 ```
 
-**IMPORTANTE:** el punto (`.`) al final crea el proyecto dentro de la carpeta actual sin generar otra carpeta contenedora.
-
-### 9) Ejecutar servidor en el puerto 8076
-
-Después de crear proyecto y app (ver abajo):
-
-```
+## 9. Ejecutar Servidor en Puerto 8076
+```bash
 python manage.py runserver 8076
 ```
 
-El servidor arrancará en `http://127.0.0.1:8076/`.
+## 10. Verificar en Navegador
+- Abrir: `http://localhost:8076`
 
-### 10) Copiar y pegar el link en el navegador
-
-Abre el navegador y pega: `http://127.0.0.1:8076/`
-
-### 11) Crear aplicación `app_Restaurante`
-
-Desde la raíz del proyecto:
-
-```
+## 11. Crear Aplicación
+```bash
 python manage.py startapp app_Restaurante
 ```
 
-### 12) Aquí el `models.py`
-
-Ya lo compartiste; úsalo tal cual en `app_Restaurante/models.py` (solo trabajaremos por ahora con `Menu`).
-
-> Modelo que pegaste (asegúrate de colocarlo en `app_Restaurante/models.py`):
+## 12. Configurar models.py
+En `app_Restaurante/models.py`:
 
 ```python
 from django.db import models
@@ -199,369 +144,454 @@ class Reservacion(models.Model):
         return f"Reservación de {self.nombre_cliente} ({self.fecha_reservacion})"
 ```
 
-### 12.5) Realizar las migraciones (makemigrations y migrate)
-
-```
+## 12.5 Realizar Migraciones
+```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 13) Primero trabajamos con el MODELO: MENU (lo haremos en views y plantillas)
-
----
-
-# 3 — Código: `views.py` (CRUD para Menu, sin forms.py)
-
-Coloca este `views.py` en `app_Restaurante/views.py`:
+## 13. Configurar Views (Solo Menu)
+En `app_Restaurante/views.py`:
 
 ```python
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Menu
-from django.urls import reverse
 
 def inicio_Restaurante(request):
     return render(request, 'inicio.html')
 
-# Crear / Agregar Menu
 def agregar_Menu(request):
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        descripcion = request.POST.get('descripcion')
-        precio = request.POST.get('precio') or 0
-        categoria = request.POST.get('categoria')
-        disponible = True if request.POST.get('disponible') == 'on' else False
-        imagen = request.POST.get('imagen')
         Menu.objects.create(
-            nombre=nombre,
-            descripcion=descripcion,
-            precio=precio,
-            categoria=categoria,
-            disponible=disponible,
-            imagen=imagen
+            nombre=request.POST['nombre'],
+            descripcion=request.POST['descripcion'],
+            precio=request.POST['precio'],
+            categoria=request.POST['categoria'],
+            disponible=request.POST.get('disponible', False),
+            imagen=request.POST['imagen']
         )
         return redirect('ver_Menu')
     return render(request, 'Menu/agregar_Menu.html')
 
-# Ver todos los menus
 def ver_Menu(request):
-    menus = Menu.objects.all().order_by('-fecha_creacion')
+    menus = Menu.objects.all()
     return render(request, 'Menu/ver_Menu.html', {'menus': menus})
 
-# Form para actualizar (carga datos)
-def actualizar_Menu(request, menu_id):
-    menu = get_object_or_404(Menu, id=menu_id)
+def actualizar_Menu(request, id):
+    menu = get_object_or_404(Menu, id=id)
     return render(request, 'Menu/actualizar_Menu.html', {'menu': menu})
 
-# Procesa la actualización
-def realizar_actualizacion_Menu(request, menu_id):
-    menu = get_object_or_404(Menu, id=menu_id)
+def realizar_actualizacion_Menu(request, id):
     if request.method == 'POST':
-        menu.nombre = request.POST.get('nombre')
-        menu.descripcion = request.POST.get('descripcion')
-        menu.precio = request.POST.get('precio') or 0
-        menu.categoria = request.POST.get('categoria')
-        menu.disponible = True if request.POST.get('disponible') == 'on' else False
-        menu.imagen = request.POST.get('imagen')
+        menu = get_object_or_404(Menu, id=id)
+        menu.nombre = request.POST['nombre']
+        menu.descripcion = request.POST['descripcion']
+        menu.precio = request.POST['precio']
+        menu.categoria = request.POST['categoria']
+        menu.disponible = request.POST.get('disponible', False)
+        menu.imagen = request.POST['imagen']
         menu.save()
         return redirect('ver_Menu')
-    return redirect('actualizar_Menu', menu_id=menu.id)
+    return redirect('ver_Menu')
 
-# Confirmar borrado
-def borrar_Menu(request, menu_id):
-    menu = get_object_or_404(Menu, id=menu_id)
+def borrar_Menu(request, id):
+    menu = get_object_or_404(Menu, id=id)
     if request.method == 'POST':
         menu.delete()
         return redirect('ver_Menu')
     return render(request, 'Menu/borrar_Menu.html', {'menu': menu})
 ```
 
----
+## 15-22. Estructura de Templates
 
-# 4 — Templates (Bootstrap + archivos solicitados)
+### Crear carpetas:
+```
+app_Restaurante/
+└── templates/
+    ├── base.html
+    ├── header.html
+    ├── navbar.html
+    ├── footer.html
+    ├── inicio.html
+    └── Menu/
+        ├── agregar_Menu.html
+        ├── ver_Menu.html
+        ├── actualizar_Menu.html
+        └── borrar_Menu.html
+```
 
-Crea carpeta `app_Restaurante/templates/` y dentro los archivos.
-
-### `base.html`
-
+### base.html
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Restaurante{% endblock %}</title>
-    <!-- Bootstrap CSS (CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-      /* Colores suaves y moderno */
-      body { background-color: #f7fafc; color:#2d3748; }
-      .footer { position: fixed; bottom: 0; left: 0; right: 0; background:#ffffff; border-top:1px solid #e2e8f0; padding:10px 0; }
-      .card { border-radius:12px; box-shadow: 0 2px 6px rgba(16,24,40,0.04); }
+        body {
+            background-color: #f8f9fa;
+            padding-top: 70px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
     </style>
-    {% block extra_head %}{% endblock %}
-  </head>
-  <body>
+</head>
+<body>
     {% include 'header.html' %}
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar p-3">
-          {% include 'navbar.html' %}
-        </nav>
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-          {% block content %}{% endblock %}
-        </main>
-      </div>
+    {% include 'navbar.html' %}
+    
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
     </div>
-
+    
     {% include 'footer.html' %}
-
-    <!-- Bootstrap JS (CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
-  </body>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
 ```
 
-### `header.html`
-
+### navbar.html
 ```html
-<header class="py-3 mb-4 border-bottom bg-white">
-  <div class="container d-flex flex-wrap justify-content-between align-items-center">
-    <a href="{% url 'inicio_Restaurante' %}" class="d-flex align-items-center text-dark text-decoration-none">
-      <span class="fs-4 fw-bold">Sistema de Administración Restaurante</span>
-    </a>
-    <div class="text-muted">Bienvenido</div>
-  </div>
-</header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'inicio_Restaurante' %}">
+            <i class="fas fa-utensils"></i> Sistema de Administración Restaurante
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'inicio_Restaurante' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-book"></i> Menu
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'agregar_Menu' %}">Agregar Menu</a></li>
+                        <li><a class="dropdown-item" href="{% url 'ver_Menu' %}">Ver Menu</a></li>
+                        <li><a class="dropdown-item" href="{% url 'ver_Menu' %}">Actualizar Menu</a></li>
+                        <li><a class="dropdown-item" href="{% url 'ver_Menu' %}">Borrar Menu</a></li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="pedidosDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-shopping-cart"></i> Pedidos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Agregar Pedidos</a></li>
+                        <li><a class="dropdown-item" href="#">Ver Pedidos</a></li>
+                        <li><a class="dropdown-item" href="#">Actualizar Pedidos</a></li>
+                        <li><a class="dropdown-item" href="#">Borrar Pedidos</a></li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="reservacionesDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-calendar-alt"></i> Reservaciones
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Agregar Reservaciones</a></li>
+                        <li><a class="dropdown-item" href="#">Ver Reservaciones</a></li>
+                        <li><a class="dropdown-item" href="#">Actualizar Reservaciones</a></li>
+                        <li><a class="dropdown-item" href="#">Borrar Reservaciones</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 ```
 
-### `navbar.html`
-
+### footer.html
 ```html
-<ul class="nav flex-column">
-  <li class="nav-item mb-2">
-    <a class="nav-link d-flex align-items-center" href="{% url 'inicio_Restaurante' %}">
-      🏠 Inicio
-    </a>
-  </li>
-
-  <li class="nav-item mb-1">
-    <a class="nav-link d-flex align-items-center" data-bs-toggle="collapse" href="#menuSub" role="button" aria-expanded="false">
-      📋 Menu
-    </a>
-    <div class="collapse" id="menuSub">
-      <ul class="nav flex-column ms-3">
-        <li><a class="nav-link" href="{% url 'agregar_Menu' %}">Agregar Menu</a></li>
-        <li><a class="nav-link" href="{% url 'ver_Menu' %}">Ver Menu</a></li>
-      </ul>
+<footer class="footer mt-auto py-3">
+    <div class="container text-center">
+        <p class="mb-1">&copy; {% now "Y" %} Sistema Restaurante - Todos los derechos reservados</p>
+        <p class="mb-0">Fecha del sistema: {% now "d/m/Y H:i" %}</p>
+        <p class="mb-0">Creado por Nicolas Rios, Cbtis 128</p>
     </div>
-  </li>
-
-  <li class="nav-item mb-1">
-    <a class="nav-link d-flex align-items-center" data-bs-toggle="collapse" href="#pedidosSub">
-      🧾 Pedidos
-    </a>
-    <div class="collapse" id="pedidosSub">
-      <ul class="nav flex-column ms-3">
-        <li><span class="nav-link disabled">Agregar Pedidos</span></li>
-        <li><span class="nav-link disabled">Ver Pedidos</span></li>
-      </ul>
-    </div>
-  </li>
-
-  <li class="nav-item mb-1">
-    <a class="nav-link d-flex align-items-center" data-bs-toggle="collapse" href="#reservSub">
-      📅 Reservaciones
-    </a>
-    <div class="collapse" id="reservSub">
-      <ul class="nav flex-column ms-3">
-        <li><span class="nav-link disabled">Agregar Reservaciones</span></li>
-        <li><span class="nav-link disabled">Ver Reservaciones</span></li>
-      </ul>
-    </div>
-  </li>
-</ul>
-```
-
-> Nota: los submenús usan `collapse` de Bootstrap. Los íconos están en el texto principal, no en subitems como pediste.
-
-### `footer.html`
-
-```html
-<footer class="footer text-center">
-  <div class="container">
-    <small>
-      &copy; {{ now.year }} Sistema Restaurante • Creado por Nicolas Rios, Cbtis 128
-    </small>
-  </div>
 </footer>
 ```
 
-> Para que `now` funcione, habilita el contexto en settings o usa `django.template.context_processors.request`. Alternativamente cambia a `{{ ""|date:"Y" }}`:
-
-```html
-&copy; {{ ""|date:"Y" }} ...
-```
-
-### `inicio.html`
-
+### inicio.html
 ```html
 {% extends 'base.html' %}
-{% block title %}Inicio - Restaurante{% endblock %}
+
 {% block content %}
-  <div class="container">
-    <div class="card p-4 mb-4">
-      <h2>Bienvenido al Sistema de Administración del Restaurante</h2>
-      <p>Este sistema permite gestionar el Menú, Pedidos y Reservaciones.</p>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Cinepolis_logo.png" alt="Cinepolis" class="img-fluid" style="max-width:300px;">
+<div class="row">
+    <div class="col-md-8 mx-auto text-center">
+        <h1 class="mb-4">Bienvenido al Sistema de Restaurante</h1>
+        <p class="lead">Sistema de administración para gestionar menús, pedidos y reservaciones.</p>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <img src="https://via.placeholder.com/800x400/4e73df/ffffff?text=Cinepolis+Restaurant" 
+                     class="img-fluid rounded" alt="Cinepolis Restaurant">
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                        <h5>Gestión de Menús</h5>
+                        <p>Administra el menú del restaurante</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
+                        <h5>Control de Pedidos</h5>
+                        <p>Gestiona pedidos de clientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt fa-3x text-warning mb-3"></i>
+                        <h5>Reservaciones</h5>
+                        <p>Administra reservas de mesas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-{% endblock %}
-```
-
-> La imagen la tomé de la red (ejemplo). Cambia la URL si deseas otra.
-
----
-
-# 5 — Templates `Menu` (CRUD)
-
-Crea `app_Restaurante/templates/Menu/` y los archivos:
-
-### `agregar_Menu.html`
-
-```html
-{% extends 'base.html' %}
-{% block content %}
-<div class="card p-4">
-  <h3>Agregar Menu</h3>
-  <form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input class="form-control" name="nombre" required>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Descripción</label>
-      <textarea class="form-control" name="descripcion"></textarea>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Precio</label>
-      <input type="number" step="0.01" class="form-control" name="precio">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Categoría</label>
-      <input class="form-control" name="categoria">
-    </div>
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" id="disponible" name="disponible">
-      <label class="form-check-label" for="disponible">Disponible</label>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">URL imagen</label>
-      <input class="form-control" name="imagen">
-    </div>
-    <button class="btn btn-primary">Agregar</button>
-  </form>
 </div>
 {% endblock %}
 ```
 
-### `ver_Menu.html`
-
+### Menu/agregar_Menu.html
 ```html
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="card p-3">
-  <h3>Lista de Menús</h3>
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th>Nombre</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for menu in menus %}
-      <tr>
-        <td>{{ menu.nombre }}</td>
-        <td>{{ menu.categoria }}</td>
-        <td>{{ menu.precio }}</td>
-        <td>{% if menu.disponible %}Sí{% else %}No{% endif %}</td>
-        <td>
-          <a class="btn btn-sm btn-info" href="{% url 'actualizar_Menu' menu.id %}">Editar</a>
-          <a class="btn btn-sm btn-danger" href="{% url 'borrar_Menu' menu.id %}">Borrar</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5">No hay menús aún.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-plus-circle"></i> Agregar Nuevo Menú
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Precio</label>
+                        <input type="number" step="0.01" class="form-control" name="precio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <input type="text" class="form-control" name="categoria" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="disponible" value="True">
+                        <label class="form-check-label">Disponible</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL de Imagen</label>
+                        <input type="url" class="form-control" name="imagen">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Menú</button>
+                    <a href="{% url 'ver_Menu' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 ```
 
-### `actualizar_Menu.html`
-
+### Menu/ver_Menu.html
 ```html
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="card p-4">
-  <h3>Actualizar Menu</h3>
-  <form method="post" action="{% url 'realizar_actualizacion_Menu' menu.id %}">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label">Nombre</label>
-      <input class="form-control" name="nombre" value="{{ menu.nombre }}">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0">
+            <i class="fas fa-list"></i> Lista de Menús
+        </h4>
+        <a href="{% url 'agregar_Menu' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Agregar Menú
+        </a>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Descripción</label>
-      <textarea class="form-control" name="descripcion">{{ menu.descripcion }}</textarea>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                        <th>Disponible</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for menu in menus %}
+                    <tr>
+                        <td>{{ menu.id }}</td>
+                        <td>{{ menu.nombre }}</td>
+                        <td>${{ menu.precio }}</td>
+                        <td>{{ menu.categoria }}</td>
+                        <td>
+                            {% if menu.disponible %}
+                                <span class="badge bg-success">Sí</span>
+                            {% else %}
+                                <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'actualizar_Menu' menu.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="{% url 'borrar_Menu' menu.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Borrar
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No hay menús registrados</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label">Precio</label>
-      <input type="number" step="0.01" class="form-control" name="precio" value="{{ menu.precio }}">
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Categoría</label>
-      <input class="form-control" name="categoria" value="{{ menu.categoria }}">
-    </div>
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" id="disponible" name="disponible" {% if menu.disponible %}checked{% endif %}>
-      <label class="form-check-label" for="disponible">Disponible</label>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">URL imagen</label>
-      <input class="form-control" name="imagen" value="{{ menu.imagen }}">
-    </div>
-    <button class="btn btn-success">Guardar</button>
-    <a class="btn btn-secondary" href="{% url 'ver_Menu' %}">Cancelar</a>
-  </form>
 </div>
 {% endblock %}
 ```
 
-### `borrar_Menu.html`
-
+### Menu/actualizar_Menu.html
 ```html
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="card p-4">
-  <h3>Confirmar Borrado</h3>
-  <p>¿Deseas borrar el menú <strong>{{ menu.nombre }}</strong>?</p>
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Sí, borrar</button>
-    <a class="btn btn-secondary" href="{% url 'ver_Menu' %}">Cancelar</a>
-  </form>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-edit"></i> Actualizar Menú: {{ menu.nombre }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'realizar_actualizacion_Menu' menu.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="nombre" value="{{ menu.nombre }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" name="descripcion" rows="3" required>{{ menu.descripcion }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Precio</label>
+                        <input type="number" step="0.01" class="form-control" name="precio" value="{{ menu.precio }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <input type="text" class="form-control" name="categoria" value="{{ menu.categoria }}" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="disponible" value="True" 
+                               {% if menu.disponible %}checked{% endif %}>
+                        <label class="form-check-label">Disponible</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL de Imagen</label>
+                        <input type="url" class="form-control" name="imagen" value="{{ menu.imagen|default:'' }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar Menú</button>
+                    <a href="{% url 'ver_Menu' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 ```
 
----
+### Menu/borrar_Menu.html
+```html
+{% extends 'base.html' %}
 
-# 6 — `urls.py` en la app y en el proyecto
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0 text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">¿Estás seguro de que deseas eliminar el menú?</p>
+                <h5 class="text-primary">{{ menu.nombre }}</h5>
+                <p class="text-muted">Precio: ${{ menu.precio }}</p>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar
+                    </button>
+                    <a href="{% url 'ver_Menu' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
 
-### `app_Restaurante/urls.py` (crear)
+## 24. Configurar URLs de la App
+En `app_Restaurante/urls.py` (crear archivo):
 
 ```python
 from django.urls import path
@@ -569,17 +599,31 @@ from . import views
 
 urlpatterns = [
     path('', views.inicio_Restaurante, name='inicio_Restaurante'),
-    path('menu/agregar/', views.agregar_Menu, name='agregar_Menu'),
-    path('menu/', views.ver_Menu, name='ver_Menu'),
-    path('menu/actualizar/<int:menu_id>/', views.actualizar_Menu, name='actualizar_Menu'),
-    path('menu/realizar_actualizacion/<int:menu_id>/', views.realizar_actualizacion_Menu, name='realizar_actualizacion_Menu'),
-    path('menu/borrar/<int:menu_id>/', views.borrar_Menu, name='borrar_Menu'),
+    path('agregar-menu/', views.agregar_Menu, name='agregar_Menu'),
+    path('ver-menu/', views.ver_Menu, name='ver_Menu'),
+    path('actualizar-menu/<int:id>/', views.actualizar_Menu, name='actualizar_Menu'),
+    path('realizar-actualizacion-menu/<int:id>/', views.realizar_actualizacion_Menu, name='realizar_actualizacion_Menu'),
+    path('borrar-menu/<int:id>/', views.borrar_Menu, name='borrar_Menu'),
 ]
 ```
 
-### `backend_Restaurante/urls.py` (vincular la app)
+## 25. Agregar App en Settings
+En `backend_Restaurante/settings.py`:
 
-Abre el `urls.py` del proyecto y modifícalo así:
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'app_Restaurante',  # Agregar esta línea
+]
+```
+
+## 26. Configurar URLs del Proyecto
+En `backend_Restaurante/urls.py`:
 
 ```python
 from django.contrib import admin
@@ -591,29 +635,8 @@ urlpatterns = [
 ]
 ```
 
----
-
-# 7 — Agregar `app_Restaurante` en `settings.py`
-
-En `backend_Restaurante/settings.py` añade la app en `INSTALLED_APPS`:
-
-```python
-INSTALLED_APPS = [
-    # apps default...
-    'django.contrib.admin',
-    'django.contrib.auth',
-    # ...
-    'app_Restaurante',
-]
-```
-
-Asegúrate también de tener `'django.template.context_processors.request'` en `TEMPLATES` (por defecto está).
-
----
-
-# 8 — Registrar modelos en `admin.py` y volver a migrar
-
-`app_Restaurante/admin.py`:
+## 27. Registrar Modelos en Admin
+En `app_Restaurante/admin.py`:
 
 ```python
 from django.contrib import admin
@@ -621,113 +644,35 @@ from .models import Menu, Pedido, Reservacion
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'categoria', 'precio', 'disponible', 'fecha_creacion')
-    search_fields = ('nombre', 'categoria')
+    list_display = ['nombre', 'precio', 'categoria', 'disponible', 'fecha_creacion']
+    list_filter = ['categoria', 'disponible']
+    search_fields = ['nombre', 'descripcion']
 
 @admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
-    list_display = ('id','menu','nombre_cliente','cantidad','total','fecha_pedido')
+    list_display = ['id', 'nombre_cliente', 'menu', 'cantidad', 'total', 'entregado']
+    list_filter = ['entregado', 'metodo_pago', 'fecha_pedido']
 
 @admin.register(Reservacion)
 class ReservacionAdmin(admin.ModelAdmin):
-    list_display = ('id','nombre_cliente','fecha_reservacion','hora','numero_personas')
+    list_display = ['nombre_cliente', 'correo', 'fecha_reservacion', 'hora', 'numero_personas']
+    list_filter = ['fecha_reservacion']
 ```
 
-Después:
-
-```
-python manage.py makemigrations app_Restaurante
-python manage.py migrate
-```
-
-Crea superusuario para acceder a admin:
-
-```
-python manage.py createsuperuser
-```
-
----
-
-# 9 — Otras configuraciones recomendadas (rápidas)
-
-* En `settings.py` añade `TIME_ZONE = 'America/Ciudad_Juarez'` si quieres la zona horaria que mencionaste.
-* Para servir archivos estáticos en desarrollo no es necesario ahora; Bootstrap viene por CDN.
-* Si la footer fija cubre contenido, añade `body { padding-bottom: 60px; }` en `base.html` CSS.
-
----
-
-# 10 — Crear la estructura completa de carpetas al inicio (comando rápido)
-
-Si quieres crear archivos vacíos por consola (opcional):
-
+## 28. Realizar Migraciones Finales
 ```bash
-mkdir -p app_Restaurante/templates/Menu
-touch app_Restaurante/__init__.py app_Restaurante/admin.py app_Restaurante/apps.py app_Restaurante/models.py app_Restaurante/views.py app_Restaurante/urls.py
-touch app_Restaurante/templates/base.html app_Restaurante/templates/header.html app_Restaurante/templates/navbar.html app_Restaurante/templates/footer.html app_Restaurante/templates/inicio.html
-touch app_Restaurante/templates/Menu/agregar_Menu.html app_Restaurante/templates/Menu/ver_Menu.html app_Restaurante/templates/Menu/actualizar_Menu.html app_Restaurante/templates/Menu/borrar_Menu.html
-```
-
-Luego llena los archivos con el código proporcionado.
-
----
-
-# 11 — Finalmente: ejecutar servidor en puerto 8076
-
-Con el entorno activo y todo migrado:
-
-```
-python manage.py runserver 8076
-```
-
-Abre `http://127.0.0.1:8076/`.
-
----
-
-# 12 — Resumen rápido de comandos en orden (copiar/pegar)
-
-```bash
-cd /ruta/a/UIII_Restaurante_0676
-python -m venv .venv
-# activar .venv (según tu OS)
-.venv\Scripts\activate   # Windows CMD
-# o
-source .venv/bin/activate  # mac/linux
-
-pip install django
-
-# crear proyecto sin duplicar carpeta
-django-admin startproject backend_Restaurante .
-
-# crear app
-python manage.py startapp app_Restaurante
-
-# editar archivos: models.py (pega tu modelo), views.py (pega código), templates (crea archivos), urls.py app, settings.py (agrega app)
-# luego migraciones
 python manage.py makemigrations
 python manage.py migrate
+```
 
-# crear superusuario (opcional)
+## 29. Crear Superusuario (Opcional)
+```bash
 python manage.py createsuperuser
+```
 
-# ejecutar en puerto 8076
+## 30. Ejecutar Servidor
+```bash
 python manage.py runserver 8076
 ```
 
----
-
-# 13 — Notas y restricciones que pediste
-
-* **No se usó `forms.py`**: las vistas manejan `request.POST` directamente.
-* **Por ahora solo trabajamos con `Menu`**; `Pedido` y `Reservacion` quedan pendientes.
-* **No validar entrada de datos** (tal como pediste).
-* **Colores suaves y diseño sencillo**: CSS embebido en `base.html`.
-* **Plantillas separadas** (`base`, `header`, `navbar`, `footer`, `inicio`, y la carpeta `Menu/`).
-
----
-
-Si quieres, puedo ahora:
-
-* Generar todo el código listo para pegar (por ejemplo `views.py`, `urls.py`, `admin.py`, y cada template) en bloques separados para que copies exactamente (ya lo incluí, pero puedo entregártelos como archivos listos).
-* O darte instrucciones para añadir estilos CSS extra, íconos (fontawesome), o manejo de imágenes subidas (Media) — aunque pediste URL para imagen, por eso usamos `URLField`.
-
-¿Te entrego los archivos listos para copiar (uno por uno) o prefieres que haga algún ajuste en el diseño o en rutas?
+El proyecto está listo y funcional en `http://localhost:8076`
