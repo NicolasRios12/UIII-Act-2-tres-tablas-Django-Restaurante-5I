@@ -1,9 +1,8 @@
 
-Perfecto — te entrego **todo** lo que pediste: procedimientos paso a paso y el código necesario para crear el proyecto Django **UIII_Restaurante_0676 / backend_Restaurante** y la app **app_Restaurante**, implementar CRUD para **Menu** (sin `forms.py`), plantillas Bootstrap, rutas, admin, migraciones y ejecución en el puerto **8076**. Todo en **español** y listo para copiar/pegar. No creo ningún documento: aquí está el contenido directo.
 
 ---
 
-# 0 — Estructura inicial (qué crear)
+# — Estructura inicial (qué crear)
 
 Al inicio crea esta estructura (puedes crear carpetas manualmente o con comandos):
 
